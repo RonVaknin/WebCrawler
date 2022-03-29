@@ -15,46 +15,62 @@ if(isNaN(depth)) {
 }
 
 
-scan(argv[0], 0);
+start();
 
 async function start(){
+    console.log("proccessing");
+
     await scan(argv[0], 0);
-    console.log(results);
-}
-
-async function scan(url, current_depth) {
-    if(current_depth >= depth){
-        return;
-    }
-
-    await axios.get(url)
-    .then(function (response) {
-        console.log("proccessing");
-        var m,
-        urls = [], 
-        str = response.data,
-        rex = /<img[^>]+src="([^">]+)/g;
-
-        while ( m = rex.exec( str ) ) {
-            result = {
-                imageUrl: m[1],
-                sourceUrl: url,
-                depth: current_depth
-            }
-            urls.push(result);
-        }
-        return JSON.stringify(urls);
-    })
-    .then(function (urls) {
-        //TODO: generate hashfile or date filename for every result
-        fs.writeFile(__dirname + "/urls.txt", urls, err => {
+    
+    let parsed_results = JSON.stringify({results: results});
+    fs.writeFile(__dirname + "/urls.txt", parsed_results, err => {
             if (err) {
             console.error(err)
             return
             }
         }
-    )});
-    // .catch(function(error){
-    //     console.error("Failed to get " + main_url);
-    // });
+    );
+}
+
+async function scan(url, current_depth) {
+    if(current_depth > depth){
+        return;
+    }
+    
+    console.info({url: url, depth: current_depth});
+
+    await axios.get(url)
+    .then(function (response) {
+        let image_url,
+        str = response.data,
+        rex = /<img[^>]+src="([^">]+)/g;
+
+        while ( image_url = rex.exec( str ) ) {
+            result = {
+                imageUrl: image_url[1],
+                sourceUrl: url,
+                depth: current_depth
+            }
+            results.push(result);
+        }
+
+        //TODO: split to functions
+        a_links = [];
+
+        if(current_depth == depth){
+            return;
+        }
+        
+        str = response.data;
+        //TODO: current regex only get http links, might want to get local path too and append current url.
+        rex = /<a[^>]+href="http([^">]+)/g;
+
+        while ( href_link = rex.exec( str ) ) {
+            let link = "http" + href_link[1]; 
+            scan(link, ++current_depth);
+        }
+    })
+    .catch(function(error){
+        console.error("Failed to get " + main_url);
+    });
 }
