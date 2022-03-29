@@ -1,0 +1,22 @@
+{
+  "name": "webcrawler",
+  "version": "1.0.0",
+  "description": "Web Crawler Exercise",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RonVaknin/WebCrawler.git"
+  },
+  "author": "Ron Vaknin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RonVaknin/WebCrawler/issues"
+  },
+  "homepage": "https://github.com/RonVaknin/WebCrawler#readme",
+  "dependencies": {
+    "axios": "^0.26.1"
+  }
+}
